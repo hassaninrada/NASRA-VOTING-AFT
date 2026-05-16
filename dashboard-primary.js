@@ -398,7 +398,6 @@ function showToast(msg, bg = 'bg-blue-600') {
 }
 
 window.deleteCandidate = deleteCandidate;
-supabase.from('candidates').select('*').then(console.log)
 updateChart();
 
 

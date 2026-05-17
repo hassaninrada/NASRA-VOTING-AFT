@@ -1,6 +1,6 @@
 import { supabase } from "./supabase-init.js";
 
-// Get current student GR / CID
+// Get student session
 const gr = localStorage.getItem("primary_gr");
 
 if (!gr) {
@@ -8,7 +8,7 @@ if (!gr) {
     window.location.href = "student-primary.html";
 }
 
-// Load saved votes
+// Load votes
 const votes = {
     headboy: localStorage.getItem("vote_headboy") || "ABSTAIN",
     headgirl: localStorage.getItem("vote_headgirl") || "ABSTAIN",
@@ -16,13 +16,13 @@ const votes = {
     deputy_headgirl: localStorage.getItem("vote_deputyheadgirl") || "ABSTAIN",
 };
 
-// Show Session ID
+// Show session ID
 const sessIdEl = document.getElementById("sessId");
 if (sessIdEl) {
     sessIdEl.textContent = `#${gr}`;
 }
 
-// Show selected candidates
+// SHOW VOTES IN UI
 const hbEl = document.getElementById("hb");
 if (hbEl) hbEl.textContent = votes.headboy;
 
@@ -35,7 +35,7 @@ if (dhbEl) dhbEl.textContent = votes.deputy_headboy;
 const dhgEl = document.getElementById("dhg");
 if (dhgEl) dhgEl.textContent = votes.deputy_headgirl;
 
-// Final submit button
+// FINAL SUBMIT
 const finalBtn = document.getElementById("finalBtn");
 
 if (finalBtn) {
@@ -52,19 +52,17 @@ if (finalBtn) {
 
         try {
 
-            // Check if already voted
             const isTch = gr.startsWith("TCH");
 
+            // CHECK ALREADY VOTED
             if (!isTch) {
-                const { data: studentData, error: studentError } = await supabase
+                const { data: studentData, error } = await supabase
                     .from("students")
                     .select("voted_primary")
                     .eq("cid", gr)
                     .single();
 
-                if (studentError) {
-                    throw studentError;
-                }
+                if (error) throw error;
 
                 if (studentData?.voted_primary) {
                     alert("Vote already cast for this ID.");
@@ -73,7 +71,7 @@ if (finalBtn) {
                 }
             }
 
-            // Submit votes
+            // SUBMIT ALL VOTES
             for (const role in votes) {
 
                 if (votes[role] !== "ABSTAIN") {
@@ -84,32 +82,26 @@ if (finalBtn) {
                         p_voter_id: gr
                     });
 
-                    if (error) {
-                        throw error;
-                    }
+                    if (error) throw error;
                 }
             }
 
-            // Mark student as voted
+            // MARK AS VOTED
             if (!isTch) {
-
-                const { error: updateError } = await supabase
+                const { error } = await supabase
                     .from("students")
                     .update({ voted_primary: true })
                     .eq("cid", gr);
 
-                if (updateError) {
-                    throw updateError;
-                }
+                if (error) throw error;
             }
 
-            // Clear local storage
+            // CLEAR LOCAL STORAGE
             localStorage.removeItem("vote_headboy");
             localStorage.removeItem("vote_headgirl");
             localStorage.removeItem("vote_deputyheadboy");
             localStorage.removeItem("vote_deputyheadgirl");
 
-            // Redirect
             setTimeout(() => {
                 window.location.href = "success-primary.html";
             }, 800);
@@ -123,23 +115,20 @@ if (finalBtn) {
                 loader.classList.remove("flex");
             }
 
-            showToast("❌ System Failure — Please Retry", "bg-red-500");
+            alert("System Failure — Please Retry");
 
             finalBtn.disabled = false;
         }
     });
 }
 
-// Restart voting
+// RESTART
 const restartBtn = document.getElementById("restartBtn");
 
 if (restartBtn) {
-
     restartBtn.addEventListener("click", () => {
 
-        const confirmReset = confirm("Discard all selections?");
-
-        if (confirmReset) {
+        if (confirm("Discard all selections?")) {
 
             localStorage.removeItem("vote_headboy");
             localStorage.removeItem("vote_headgirl");
@@ -149,22 +138,4 @@ if (restartBtn) {
             window.location.href = "student-primary.html";
         }
     });
-}
-
-// Toast Notification
-function showToast(msg, bg) {
-
-    const toast = document.getElementById("toast");
-
-    if (toast) {
-
-        toast.textContent = msg;
-
-        toast.className =
-            `fixed bottom-8 left-1/2 -translate-x-1/2 px-6 py-4 rounded-2xl shadow-2xl text-white font-bold text-sm z-50 transition-all ${bg} block fadeIn`;
-
-        setTimeout(() => {
-            toast.classList.add("hidden");
-        }, 4000);
-    }
 }

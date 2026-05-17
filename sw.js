@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nasra-vote-v7';
+const CACHE_NAME = 'nasra-vote-v8';
 const ASSETS = [
   './',
   './index.html',

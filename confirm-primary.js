@@ -1,5 +1,11 @@
 import { supabase } from "./supabase-init.js";
+window.testvote = async function () {
+  const { data, error } = await supabase
+    .from('votes_audit')
+    .insert([{ vote: 1 }])
 
+  console.log(data, error)
+}
 const gr = localStorage.getItem("primary_gr");
 
 const votes = {

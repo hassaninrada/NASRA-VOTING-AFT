@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nasra Hub — Digital Election Infrastructure</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1565C0">
+  <style>
+    :root {
+      --primary-blue: #3498DB;
+      --light-blue-bg: #E3F2FD;
+      --soft-blue: #BBDEFB;
+      --deep-blue: #1565C0;
+      --text-main: #0D47A1;
+      --card-glass: rgba(255, 255, 255, 0.7);
+      --border-glass: rgba(187, 222, 251, 0.5);
+      --shadow-premium: 0 20px 40px -10px rgba(13, 71, 161, 0.1);
+    }
+
+    body {
+      background-color: var(--light-blue-bg);
+      color: var(--text-main);
+      font-family: 'Outfit', sans-serif;
+      margin: 0;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    /* Vibrant Sky Background */
+    .sky-container {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: radial-gradient(circle at top left, #FFFFFF 0%, #E3F2FD 50%, #BBDEFB 100%);
+    }
+
+    .aura {
+      position: absolute;
+      width: 80vw;
+      height: 80vw;
+      background: radial-gradient(circle, rgba(52, 152, 219, 0.15) 0%, transparent 70%);
+      filter: blur(80px);
+      border-radius: 50%;
+      animation: drift 25s infinite alternate ease-in-out;
+    }
+
+    @keyframes drift {
+      from {
+        transform: translate(-10%, -10%) scale(1);
+      }
+
+      to {
+        transform: translate(10%, 10%) scale(1.1);
+      }
+    }
+
+    /* Bento Grid Logic */
+    .bento-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 1.5rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .bento-card {
+      background: var(--card-glass);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      border: 2px solid var(--border-glass);
+      border-radius: 3.5rem;
+      padding: 2.5rem;
+      transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-premium);
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .bento-card:hover {
+      transform: translateY(-12px) scale(1.02);
+      background: rgba(255, 255, 255, 0.95);
+      border-color: var(--primary-blue);
+      box-shadow: 0 40px 80px -20px rgba(13, 71, 161, 0.25);
+    }
+
+    .card-large {
+      grid-column: span 6;
+      padding: 3.5rem;
+    }
+
+    .card-small {
+      grid-column: span 4;
+    }
+
+
+
+    .icon-box {
+      width: 76px;
+      height: 76px;
+      background: #FFFFFF;
+      border-radius: 1.8rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: var(--primary-blue);
+      box-shadow: 0 12px 24px rgba(13, 71, 161, 0.08);
+      transition: all 0.5s;
+    }
+
+    .bento-card:hover .icon-box {
+      background: var(--primary-blue);
+      color: #FFF;
+      transform: scale(1.1) rotate(8deg);
+    }
+
+    /* Status Indicator */
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 24px;
+      background: white;
+      border-radius: 100px;
+      font-weight: 800;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--primary-blue);
+      box-shadow: 0 8px 20px rgba(13, 71, 161, 0.05);
+    }
+
+    .pulse-dot {
+      width: 10px;
+      height: 10px;
+      background: #2ECC71;
+      border-radius: 50%;
+      position: relative;
+    }
+
+    .pulse-dot::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      background: inherit;
+      opacity: 0.4;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+        opacity: 0.4;
+      }
+
+      100% {
+        transform: scale(3);
+        opacity: 0;
+      }
+    }
+
+    /* Logo Animation */
+    .logo-float {
+      animation: logoFloat 6s infinite ease-in-out;
+    }
+
+    @keyframes logoFloat {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-15px);
+      }
+    }
+
+    /* Page Loader */
+    .loader {
+      position: fixed;
+      inset: 0;
+      background: #E3F2FD;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.8s ease;
+    }
+
+    .loader-orb {
+      width: 60px;
+      height: 60px;
+      border: 5px solid #BBDEFB;
+      border-top: 5px solid var(--deep-blue);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .developer-credit {
+      position: fixed;
+      bottom: 10px;
+      right: 15px;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 13px;
+      color: #aaa;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 6px 12px;
+      border-radius: 20px;
+      backdrop-filter: blur(6px);
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+      z-index: 9999;
+    }
+
+    .developer-credit strong {
+      color: #00ffff;
+      margin-left: 4px;
+    }
+
+    /* Navbar Styles */
+    .glass-nav {
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-glass);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 20px rgba(13, 71, 161, 0.05);
+    }
+
+    .nav-logo {
+      font-weight: 800;
+      color: var(--deep-blue);
+      text-decoration: none;
+      font-size: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+    }
+
+    .nav-link {
+      color: var(--text-main);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.3s ease;
+      position: relative;
+    }
+
+    .nav-link:hover {
+      color: var(--primary-blue);
+    }
+
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 2px;
+      bottom: -4px;
+      left: 0;
+      background-color: var(--primary-blue);
+      transition: width 0.3s ease;
+    }
+
+    .nav-link:hover::after {
+      width: 100%;
+    }
+
+    .offline-banner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: #ef4444;
+      color: white;
+      text-align: center;
+      padding: 8px;
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      z-index: 9999;
+      transform: translateY(-100%);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    body.is-offline .offline-banner {
+      transform: translateY(0);
+    }
+
+    body.is-offline .pulse-dot {
+      background: #ef4444;
+      box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+    }
+  </style>
+
+</head>
+
+<body>
+  <div class="offline-banner">
+    <i class="fa-solid fa-wifi-slash mr-2"></i> Official Node Offline — Voting Disabled
+  </div>
+
+  <div class="loader" id="loader">
+    <div class="loader-orb"></div>
+  </div>
+
+  <div class="sky-container">
+    <div class="aura" style="top: -10%; left: -5%;"></div>
+    <div class="aura" style="bottom: -10%; right: -5%; background: rgba(52, 152, 219, 0.05);"></div>
+  </div>
+
+  <nav class="glass-nav">
+    <a href="index.html" class="nav-logo">
+      <i class="fa-solid fa-code-branch"></i> Nasra Hub
+    </a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="about.html" class="nav-link">About Developer</a>
+    </div>
+  </nav>
+
+  <main class="relative z-10 pt-10 pb-32">
+    <header class="flex flex-col items-center text-center mb-24 px-6">
+      <div class="status-pill mb-10">
+        <div class="pulse-dot"></div>
+        Cloud Election Network Live
+      </div>
+
+      <div class="logo-float mb-10">
+        <img src="https://nasraschool.edu.pk/wp-content/uploads/2024/03/logo.webp"
+          class="w-32 drop-shadow-[0_20px_40px_rgba(13,71,161,0.2)]" />
+      </div>
+
+      <h1 class="text-9xl font-black mb-6 tracking-tighter text-blue-900 leading-none">
+        Voting <span class="text-blue-500">Hub</span>
+      </h1>
+      <p class="text-blue-900/40 font-black uppercase tracking-[0.6em] text-xs">Education Trust Nasra
+        Schools — Official Terminal</p>
+    </header>
+
+    <div class="bento-grid">
+      <!-- Path: Secondary -->
+      <a href="student-secondary.html" class="bento-card card-large group touch-manipulation">
+        <div class="icon-box"><i class="fa-solid fa-user-graduate"></i></div>
+        <div class="mt-24">
+          <h2 class="text-4xl font-black mb-3 text-blue-900">Secondary Path</h2>
+          <p class="text-blue-700/60 leading-relaxed font-medium text-lg">Grades 6 – 10: Authorized gateway for the
+            Secondary Wing leadership elections.</p>
+        </div>
+        <div
+          class="absolute top-12 right-12 w-12 h-12 flex items-center justify-center rounded-full bg-blue-50 text-blue-400 group-hover:bg-blue-600 group-hover:text-white transition-all">
+          <i class="fa-solid fa-arrow-right-long text-xl"></i>
+        </div>
+      </a>
+
+      <!-- Path: Primary -->
+      <a href="student-primary.html" class="bento-card card-large group touch-manipulation">
+        <div class="icon-box"><i class="fa-solid fa-graduation-cap"></i></div>
+        <div class="mt-24">
+          <h2 class="text-4xl font-black mb-3 text-blue-900">Primary Path</h2>
+          <p class="text-blue-700/60 leading-relaxed font-medium text-lg">Grades 1 – 5: Authorized gateway for the
+            Primary Wing leadership elections.</p>
+        </div>
+        <div
+          class="absolute top-12 right-12 w-12 h-12 flex items-center justify-center rounded-full bg-blue-50 text-blue-400 group-hover:bg-blue-600 group-hover:text-white transition-all">
+          <i class="fa-solid fa-arrow-right-long text-xl"></i>
+        </div>
+      </a>
+
+      <!-- Teacher Hub -->
+      <a href="teacher.html" class="bento-card card-small group touch-manipulation">
+        <div class="icon-box"><i class="fa-solid fa-chalkboard-user"></i></div>
+        <div class="mt-10">
+          <h3 class="text-2xl font-black text-blue-900 mb-1">Teacher Hub</h3>
+          <p class="text-blue-400 font-black text-[10px] uppercase tracking-widest">voting for candities</p>
+        </div>
+      </a>
+
+      <!-- Admin HQ Primary -->
+      <a href="admin-login.html" class="bento-card card-small group touch-manipulation">
+        <div class="icon-box"><i class="fa-solid fa-shield-halved"></i></div>
+        <div class="mt-10">
+          <h3 class="text-2xl font-black text-blue-900 mb-1">Primary HQ</h3>
+          <p class="text-blue-400 font-black text-[10px] uppercase tracking-widest">Executive Management</p>
+        </div>
+      </a>
+
+      <!-- Admin HQ Secondary -->
+      <a href="admin-secondary.html" class="bento-card card-small group touch-manipulation">
+        <div class="icon-box"><i class="fa-solid fa-lock"></i></div>
+        <div class="mt-10">
+          <h3 class="text-2xl font-black text-blue-900 mb-1">Secondary HQ</h3>
+          <p class="text-blue-400 font-black text-[10px] uppercase tracking-widest">Executive Management</p>
+        </div>
+      </a>
+    </div>
+  </main>
+
+  <footer class="text-center py-20 opacity-30 text-blue-900 font-black uppercase tracking-[0.5em] text-[10px]">
+    Nasra E- Election © 2026
+  </footer>
+  <footer class="developer-credit">
+    <span>Developed by</span>
+    <strong>Hasnain Rada</strong>
+  </footer>
+
+  <script src="index.js"></script>
+  <script src='developer-credit.js'></script>
+</body>
+
+
+</html>

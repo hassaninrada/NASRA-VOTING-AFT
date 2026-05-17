@@ -1,139 +1,114 @@
 import { supabase } from "./supabase-init.js";
 
 const gr = localStorage.getItem("primary_gr");
-
-// ======================
-// LOAD VOTES (SAFE)
-// ======================
 const votes = {
     headboy: localStorage.getItem("vote_headboy") || "ABSTAIN",
     headgirl: localStorage.getItem("vote_headgirl") || "ABSTAIN",
-    deputy_headboy: localStorage.getItem("vote_deputyheadboy") || "ABSTAIN",
-    deputy_headgirl: localStorage.getItem("vote_deputyheadgirl") || "ABSTAIN"
+    deputyboy: localStorage.getItem("vote_deputyboy") || "ABSTAIN",
+    deputygirl: localStorage.getItem("vote_deputygirl") || "ABSTAIN"
 };
 
-// ======================
-// DISPLAY (SAFE UI)
-// ======================
-document.getElementById("hb") && (document.getElementById("hb").textContent = votes.headboy);
-document.getElementById("hg") && (document.getElementById("hg").textContent = votes.headgirl);
-document.getElementById("dhb") && (document.getElementById("dhb").textContent = votes.deputy_headboy);
-document.getElementById("dhg") && (document.getElementById("dhg").textContent = votes.deputy_headgirl);
-
-// SESSION ID
 const sessIdEl = document.getElementById("sessId");
 if (sessIdEl && gr) sessIdEl.textContent = `#${gr}`;
 
-// ======================
-// FINAL SUBMIT
-// ======================
-const finalBtn = document.getElementById("finalBtn");
+const hbEl = document.getElementById("hb");
+if (hbEl) hbEl.textContent = votes.headboy;
 
+const hgEl = document.getElementById("hg");
+if (hgEl) hgEl.textContent = votes.headgirl;
+
+const dhbEl = document.getElementById("dhb");
+if (dhbEl) dhbEl.textContent = votes.deputyboy;
+
+const dhgEl = document.getElementById("dhg");
+if (dhgEl) dhgEl.textContent = votes.deputygirl;
+
+const finalBtn = document.getElementById("finalBtn");
 if (finalBtn) {
     finalBtn.addEventListener("click", async () => {
-
         const loader = document.getElementById("loader");
-        finalBtn.disabled = true;
 
+        finalBtn.disabled = true;
         if (loader) {
             loader.classList.remove("hidden");
             loader.classList.add("flex");
         }
 
         try {
-
             const isTch = gr && gr.startsWith("TCH");
-
-            // check already voted
             if (!isTch && gr) {
-                const { data, error } = await supabase
-                    .from("students")
-                    .select("voted_primary")
-                    .eq("cid", gr)
-                    .single();
-
-                if (error) throw error;
-
-                if (data?.voted_primary) {
-                    alert("Already voted!");
+                const { data: s } = await supabase.from('students').select('voted_primary').eq('cid', gr).single();
+                if (s?.voted_primary) {
+                    alert("Vote already cast for this ID.");
                     window.location.href = "index.html";
                     return;
                 }
             }
 
-            // ======================
-            // SUBMIT ONLY REAL VOTES
-            // ======================
             for (const role in votes) {
-
-                const value = votes[role];
-
-                // ignore ABSTAIN
-                if (value && value !== "ABSTAIN") {
-
-                    const { error } = await supabase.rpc("vote_upsert_secure", {
+                if (votes[role] !== "ABSTAIN") {
+                    await supabase.rpc('vote_upsert_secure', {
                         p_role: role,
-                        p_candidate_name: value,
+                        p_candidate_name: votes[role],
                         p_voter_id: gr || "GUEST"
                     });
-
-                    if (error) throw error;
                 }
             }
 
-            // mark student voted
             if (!isTch && gr) {
-                const { error } = await supabase
-                    .from("students")
-                    .update({ voted_primary: true })
-                    .eq("cid", gr);
-
-                if (error) throw error;
+                await supabase.from('students').update({ voted_primary: true }).eq('cid', gr);
             }
 
-            // ======================
-            // CLEAN STORAGE
-            // ======================
             localStorage.removeItem("vote_headboy");
             localStorage.removeItem("vote_headgirl");
-            localStorage.removeItem("vote_deputyheadboy");
-            localStorage.removeItem("vote_deputyheadgirl");
+            localStorage.removeItem("vote_deputyboy");
+            localStorage.removeItem("vote_deputygirl");
 
-            setTimeout(() => {
-                window.location.href = "success-primary.html";
-            }, 800);
+            setTimeout(() => { window.location.href = "success-primary.html"; }, 800);
 
         } catch (err) {
-
-            console.error("Voting Error:", err);
-
             if (loader) {
                 loader.classList.add("hidden");
                 loader.classList.remove("flex");
             }
-
-            alert("System Error — Try Again");
-
+            showToast("❌ System Connectivity Failure — Please Retry", "bg-red-500");
             finalBtn.disabled = false;
         }
     });
 }
 
-// ======================
-// RESTART
-// ======================
-document.getElementById("restartBtn")?.addEventListener("click", () => {
+const restartBtn = document.getElementById("restartBtn");
+if (restartBtn) {
+    restartBtn.addEventListener("click", () => {
+        if (confirm("Discard all current selections?")) {
+            localStorage.removeItem("vote_headboy");
+            localStorage.removeItem("vote_headgirl");
+            localStorage.removeItem("vote_deputyboy");
+            localStorage.removeItem("vote_deputygirl");
+            window.location.href = "student-primary.html";
+        }
+    });
+}
 
-    if (confirm("Discard all selections?")) {
-
-        localStorage.removeItem("vote_headboy");
-        localStorage.removeItem("vote_headgirl");
-        localStorage.removeItem("vote_deputyheadboy");
-        localStorage.removeItem("vote_deputyheadgirl");
-
-        window.location.href = "student-primary.html";
+function showToast(msg, bg) {
+    const toast = document.getElementById("toast");
+    if (toast) {
+        toast.textContent = msg;
+        toast.className = `fixed bottom-8 left-1/2 -translate-x-1/2 px-6 py-4 rounded-2xl shadow-2xl text-white font-bold text-sm z-50 transition-all ${bg} block fadeIn`;
+        setTimeout(() => {
+            if (toast) toast.classList.add('hidden');
+        }, 4000);
     }
-});
+}
+
+
+
+
+
+
+
+
+
 
 
 

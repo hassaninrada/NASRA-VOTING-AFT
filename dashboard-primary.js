@@ -3,7 +3,9 @@ import { supabase } from "./supabase-init.js";
 // APP STATE
 const roleNames = {
     headboy: "Wing Head Boy",
-    headgirl: "Wing Head Girl"
+    headgirl: "Wing Head Girl",
+ deputy_headboy: "Deputy Wing Head Boy",
+deputy_headgirl: "Deputy Wing Head Girl"
     // Deputy roles removed
 };
 

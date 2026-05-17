@@ -1,10 +1,12 @@
 import { supabase } from "./supabase-init.js";
 
 const gr = localStorage.getItem("primary_gr");
+
 const votes = {
     headboy: localStorage.getItem("vote_headboy") || "ABSTAIN",
     headgirl: localStorage.getItem("vote_headgirl") || "ABSTAIN",
-   
+    deputy_headboy: localStorage.getItem("vote_deputyheadboy") || "ABSTAIN",
+    deputy_headgirl: localStorage.getItem("vote_deputyheadgirl") || "ABSTAIN",
 };
 
 const sessIdEl = document.getElementById("sessId");
@@ -17,10 +19,10 @@ const hgEl = document.getElementById("hg");
 if (hgEl) hgEl.textContent = votes.headgirl;
 
 const dhbEl = document.getElementById("dhb");
-if (dhbEl) dhbEl.textContent = votes.deputyboy;
+if (dhbEl) dhbEl.textContent = votes.deputy_headboy;
 
 const dhgEl = document.getElementById("dhg");
-if (dhgEl) dhgEl.textContent = votes.deputygirl;
+if (dhgEl) dhgEl.textContent = votes.deputy_headgirl;
 
 const finalBtn = document.getElementById("finalBtn");
 if (finalBtn) {
@@ -60,17 +62,16 @@ if (finalBtn) {
 
             localStorage.removeItem("vote_headboy");
             localStorage.removeItem("vote_headgirl");
-            localStorage.removeItem("vote_deputyboy");
-            localStorage.removeItem("vote_deputygirl");
+            localStorage.removeItem("vote_deputyheadboy");
+            localStorage.removeItem("vote_deputyheadgirl");
 
             setTimeout(() => { window.location.href = "success-primary.html"; }, 800);
 
         } catch (err) {
             if (loader) {
                 loader.classList.add("hidden");
-                loader.classList.remove("flex");
             }
-            showToast("❌ System Connectivity Failure — Please Retry", "bg-red-500");
+            showToast("❌ System Failure — Please Retry", "bg-red-500");
             finalBtn.disabled = false;
         }
     });
@@ -79,11 +80,11 @@ if (finalBtn) {
 const restartBtn = document.getElementById("restartBtn");
 if (restartBtn) {
     restartBtn.addEventListener("click", () => {
-        if (confirm("Discard all current selections?")) {
+        if (confirm("Discard all selections?")) {
             localStorage.removeItem("vote_headboy");
             localStorage.removeItem("vote_headgirl");
-            localStorage.removeItem("vote_deputyboy");
-            localStorage.removeItem("vote_deputygirl");
+            localStorage.removeItem("vote_deputyheadboy");
+            localStorage.removeItem("vote_deputyheadgirl");
             window.location.href = "student-primary.html";
         }
     });
@@ -95,8 +96,13 @@ function showToast(msg, bg) {
         toast.textContent = msg;
         toast.className = `fixed bottom-8 left-1/2 -translate-x-1/2 px-6 py-4 rounded-2xl shadow-2xl text-white font-bold text-sm z-50 transition-all ${bg} block fadeIn`;
         setTimeout(() => {
-            if (toast) toast.classList.add('hidden');
+            toast.classList.add('hidden');
         }, 4000);
     }
 }
+
+
+
+
+
 
